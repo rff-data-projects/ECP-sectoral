@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">   --> 
+<link rel="stylesheet" href="./bulma.min.css">
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script src="./searchbar_placeholder.js"></script> 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<script src="//cdnjs.cloudflare.com/ajax/libs/list.js/1.5.0/list.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.4.4/d3.min.js"></script>
+<script src="https://code.highcharts.com/stock/highstock.js"></script>
+<script src="https://code.highcharts.com/stock/modules/accessibility.js"></script>
+
+<style>
+
+@font-face{font-family:'Calibre Web Regular';src:url("./fonts/CalibreWeb-Regular.a01659ae94a6.woff2") format("woff2"),url("./fonts/CalibreWeb-Regular.f2bfe0dcf438.woff") format("woff");font-style:normal;font-display:block}@font-face{font-family:'Calibre Web Regular';src:url("./fonts/CalibreWeb-RegularItalic.6faa253b19be.woff2") format("woff2"),url("./fonts/CalibreWeb-RegularItalic.56777352448e.woff") format("woff");font-style:italic;font-display:block}@font-face{font-family:'Calibre Web Bold';src:url("./fonts/calibre-web-bold.4bb9cb3b931d.woff") format("woff"),url("./fonts/calibre-web-bold.8158bf468628.woff2") format("woff2");font-style:normal;font-display:block}@font-face{font-family:'Calibre Web Bold';src:url("./fonts/calibre-web-bold-italic.542586d37593.woff") format("woff"),url("./fonts/calibre-web-bold-italic.99d5a9010b36.woff2") format("woff2");font-style:italic;font-display:block}
+
+body {
+    font-family: "Calibre Web Regular", "Calibre Web Bold";
+    -webkit-font-smoothing: antialiased;
+    color: #04273c !important;
+    font-size:18px;
+  }
+
+::-webkit-scrollbar {
+  width: 14px;
+}
+
+::-webkit-scrollbar-thumb {
+  border: 2px solid #fff;
+  background-clip: padding-box;
+  border-radius: 9999px;
+  background-color: #c2e1fb;
+}
+
+.box{
+  padding: 0.9rem ;
+}
+
+.level-item.has-text-centered {
+    margin: 0px 5px;
+}
+
+.select2-container--default .select2-search--dropdown .select2-search__field{
+  border-color: #c2e1fb;
+}
+
+.select2-dropdown{
+  border-color: #c2e1fb;
+}
+
+.select2-container--default .select2-selection--single{
+  border-color: #c2e1fb;
+}
+
+.select2-results{
+        font-size:16px;
+        scrollbar-color: #c2e1fb #fff;
+        border-color: #c2e1fb;
+ }
+
+ .select2-results__group{
+  font-weight: normal;
+  font-family: 'Calibre Web bold'
+ }
+
+ .select2{
+        font-size:18px;
+        border-color: #c2e1fb;
+ }
+
+ .selector-title{
+  text-align: center;
+  font-family: 'Calibre Web Bold';
+  font-size: 18px !important;
+  padding-bottom: 5px; 
+}
+
+ .select2-result-label .wrap:before{
+    position:absolute;
+    left:4px;
+    font-family:fontAwesome;
+    color:rgb(200, 200, 200);
+    content:"TEST";
+    width:25px;
+    height:25px;   
+}
+
+.select2-results__option.select2-results__option--selectable.select2-results__option--selected{
+    background: #f6f6f6;
+    color: rgb(0, 0, 0);
+}
+
+.select2-results__option.select2-results__option--selectable.select2-results__option--highlighted{
+    background: #def1ff;
+    color: rgb(0, 0, 0);
+}
+
+.select2-result-label .wrap{
+    margin-left:15px;
+}
+
+.list {
+  padding: 0px 0 0;
+  width:100%;
+  scrollbar-color: #c2e1fb #fff;
+}
+
+.list > li {
+  display:block;
+  background-color: #f2f9ff;
+  padding:5px;
+/*   box-shadow: inset 0 1px 0 #fff; */
+}
+
+input {
+  border:solid 1px #c2e1fb;
+  border-radius: 5px;
+  padding:7px 14px;
+}
+input:focus {
+  outline:none;
+  border-color:#aaa;
+}
+input.search{
+    width:100%;
+    background-color: #f2f9ff;
+}
+
+.all_butt{
+    background-color: #c2e1fb;
+    width: 48%;
+    text-align: center;
+    border-radius: 5px;
+    padding: 3px
+}
+
+.all_butt:hover{
+    background-color:#def1ff;
+    cursor: pointer;
+}
+
+#country_list{
+  height:382px;
+}
+
+.has-background-info-light {
+  background-color: #f2f9ff !important;
+}
+
+ul.list {overflow:hidden; overflow-y:scroll;}
+
+ul.list li:hover, ul li:focus {
+background-color:#def1ff;
+}
+
+.highcharts-title{
+  font-family: "Calibre Web Regular", "Calibre Web Bold";
+}
+
+.unselectable {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.greyed{
+  color: #adadad
+}
+
+.juri-header{
+  font-family: 'Calibre Web Bold';
+  pointer-events: none;
+}
+
+.juri-header li:hover li:focus{
+  background-color:#ffffff;
+}
+
+.tool_head {
+    display: block; 
+    font-family: 'Calibre Web Bold';
+    font-size: 18px;
+    padding-left: 7px;
+    padding-right: 7px;
+    padding-top: 5px;
+    margin-bottom: -5px;
+  }
+
+  .grid-container {
+    display: inline-grid;
+    grid-template-columns: 120px 120px;
+    white-space: normal;
+    padding: 7px
+  }
+  
+  .grid-item{
+    border-bottom: 1px solid #726d6d;
+    border-color: #C3E1F9;
+    padding-bottom: 7px;
+    padding-top: 7px;
+    align-items: center;
+    display: grid;
+    white-space: normal;
+    font-size: 14px;
+  }
+
+  .grid-last-item{
+    padding-top: 7px;
+    font-size: 14px;
+    margin-bottom: -2px;
+  }
+
+#viz{
+  margin-right: 5%;
+  margin-left: 5%
+}
+
+@media only screen and (min-width: 1052px) {
+  #juri-select{
+  height: 75vh;
+  } 
+  #country_list{
+   height: 53vh;
+  }
+  .navbar{
+  height: 15vh;
+  }
+  #viz{
+    height: 65vh;
+  }
+}
+
+@media only screen and (min-height: 800px) {
+  #country_list{
+   height: 58vh;
+  }
+}
+
+@media only screen and (max-height: 590px) {
+  #country_list{
+   height: 45vh;
+  }
+}
+
+@media only screen and (max-height: 450px) {
+  #country_list{
+   height: 40vh;
+  }
+}
+
+@media only screen and (max-height: 375px) {
+  #country_list{
+   height: 35vh;
+  }
+}
+
+@media only screen and (max-height: 325px) {
+  #country_list{
+   height: 30vh;
+  }
+}
+
+.helptip {
+  position: relative;
+  display: inline-block;
+}
+
+.helptip .helptiptext {
+  font-family: "Calibre Web Regular", "Calibre Web Bold";
+  font-size: 11px;
+  visibility: hidden;
+  background-color: white;
+  text-align: center;
+  border-radius: 2px;
+  border-style: solid;
+  border-width: 1px;
+  box-shadow: 2px 2px 2px rgb(172, 172, 172);
+  position: absolute;
+  z-index: 10000;
+  /* Fade in tooltip - takes 1 second to go from 0% to 100% opac: */
+  opacity: 0;
+  transition: opacity 1s;
+}
+
+.helptip:hover .helptiptext {
+  visibility: visible;
+  opacity: 1;
+}
+
+.helptiptext{
+  padding: 5px;
+}
+
+</style>
+
+</head>
+<body>
+
+  <div class="columns">
+    <!-- COL 1 -->
+    <div class="column is-9">
+      <!-- Selectors -->
+      <div class="tile is-parent navbar">
+        <div class="tile is-child box is-radiusless is-shadowless">
+          <nav class="level">
+            <!-- Pricing selector -->
+            <div class="level-item has-text-centered">
+                <div>
+                <div class = "selector-title unselectable"> Pricing instrument </div>
+                <select class="pricing-select" id = "pricing-selector" style = "cursor: pointer; width: 250px" name = "state"></select> 
+                </div>
+            </div>
+            <!-- Year selector -->
+            <div class="level-item has-text-centered">
+                <div>
+                <div class = "selector-title unselectable"> Year </div>
+                <select class="year-select" id = "year-selector" style = "cursor: pointer; width: 250px" name = "state"></select> 
+                </div>
+            </div>
+            <!-- Sector selector -->
+            <div class="level-item has-text-centered">
+              <div>
+              <div class = "selector-title unselectable">
+                Sector
+                <div class="helptip"> 
+                  <svg aria-hidden="true" class="svgIcon helpIcon" width="10" height="10" viewBox="0 0 18 18">
+                    <path fill="#4a4a4a" d="M9 1C4.64 1 1 4.64 1 9c0 4.36 3.64 8 8 8 4.36 0 8-3.64 8-8 0-4.36-3.64-8-8-8Zm.81 12.13c-.02.71-.55 1.15-1.24 1.13-.66-.02-1.17-.49-1.15-1.2.02-.72.56-1.18 1.22-1.16.7.03 1.2.51 1.17 1.23ZM11.77 8c-.59.66-1.78 1.09-2.05 1.97a4 4 0 0 0-.09.75c0 .05-.03.16-.18.16H7.88c-.16 0-.18-.1-.18-.15.06-1.35.66-2.2 1.83-2.88.39-.29.7-.75.7-1.24.01-1.24-1.64-1.82-2.35-.72-.21.33-.18.73-.18 1.1H5.75c0-1.97 1.03-3.26 3.03-3.26 1.75 0 3.47.87 3.47 2.83 0 .57-.2 1.05-.48 1.44Z"></path>
+                  </svg>
+                  <text class="helptiptext" style ="width: 220px; bottom: -100%; margin-left: 10px;">
+                    A sector appears greyed out if, for the current selection of "Pricing Instrument" and "Year", there is no available data for that sector
+                  </text>
+                </div>  
+              </div>
+              <select class="sector-select" id = "sector-selector" style = "cursor: pointer; width: 250px" name = "state"></select> 
+              </div>
+            </div>
+          </nav>
+        </div>
+      </div>
+      <!-- Viz -->
+      <div class="tile is-parent">
+        <div class="tile is-child box is-radiusless is-shadowless">
+          <div id="viz"></div></script>
+        </div>
+      </div>
+    </div>
+     <!-- COL 2 -->
+    <div class="column">
+      <div class="tile is-12 is-parent">
+        <div class="tile is-child box has-background-info-light is-radiusless is-shadowless">
+          <div id="juri-select">
+            <div class = "selector-title unselectable"> 
+              Jurisdictions
+              <div class ="helptip"> 
+              <svg aria-hidden="true" class="svg-icon helpIcon" width="10" height="10" viewBox="0 0 18 18">
+                <path fill="#4a4a4a" d="M9 1C4.64 1 1 4.64 1 9c0 4.36 3.64 8 8 8 4.36 0 8-3.64 8-8 0-4.36-3.64-8-8-8Zm.81 12.13c-.02.71-.55 1.15-1.24 1.13-.66-.02-1.17-.49-1.15-1.2.02-.72.56-1.18 1.22-1.16.7.03 1.2.51 1.17 1.23ZM11.77 8c-.59.66-1.78 1.09-2.05 1.97a4 4 0 0 0-.09.75c0 .05-.03.16-.18.16H7.88c-.16 0-.18-.1-.18-.15.06-1.35.66-2.2 1.83-2.88.39-.29.7-.75.7-1.24.01-1.24-1.64-1.82-2.35-.72-.21.33-.18.73-.18 1.1H5.75c0-1.97 1.03-3.26 3.03-3.26 1.75 0 3.47.87 3.47 2.83 0 .57-.2 1.05-.48 1.44Z"></path>
+              </svg>
+              <text class="helptiptext" style ="width: 240px; bottom: -100%; margin-left: -250px;">
+                A jurisdiction appears greyed out if, for the current selection of "Pricing Instrument", "Year", and "Sector", there is no available data for that jurisdiction</text>
+            </div>
+          </div>
+            <nav class='level'> <input class="search" placeholder="Type to search jurisdictions" /> </nav>
+            <!-- <nav class='level'> <text class="sort" data-sort="search_name"> Sort </text> </nav> -->
+            <nav class="level is-mobile">
+                <div id="select_all" class="all_butt level-item">
+                  <text class = 'unselectable'> Select all</text>
+                </div>
+                <div id="clear_all" class="all_butt level-item">
+                  <text class = "unselectable"> Clear all</text>
+                </div></nav>
+            <nav class='level'> <ul class="list" id="country_list"> </ul>  </nav>          
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script src="./createListItem.js"></script>
+<script src="./charts.js"></script>
+<script src ='./update.js'></script>
+<script src ='./main.js'></script>  
+
+</body>
+</html>
