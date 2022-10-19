@@ -57,51 +57,52 @@ d3.csv('./data/IPCC2006-IEA-category-codes.csv').then(function(data){
 
   let container = $('#sector-selector')
 
-        const levels = ['Energy', 
-                        'Industrial Processes and Product Use',
-                        'Agriculture, Forestry and Other Land Use',
-                        'Waste',
-                        'Other']
+    const levels = ['Energy', 
+                    'Industrial Processes and Product Use',
+                    'Agriculture, Forestry and Other Land Use',
+                    'Waste',
+                    'Other']
 
-       levels.forEach(function(d,i){
-            
-            var cur_lowest_levels = data.filter(d => (
-                                d.lowest_level === "1" &  d.IPCC_CODE.startsWith(i+1)
-                                ))
-            
-            container
-              .append($('<optgroup>')
-              .attr('label', d)
+    levels.forEach(function(d,i){
+        
+        var cur_lowest_levels = data.filter(d => (
+                            d.lowest_level === "1" &  d.IPCC_CODE.startsWith(i+1)
+                            ))
+        
+        container
+          .append($('<optgroup>')
+          .attr('label', d)
+          )
+
+        cur_lowest_levels.forEach(function(c){
+          container
+              .append($('<option>')
+              .attr('data-ipcc_code', c.IPCC_CODE)
+              .text(c.IPCC_CODE + " " +  c.FULLNAME)
               )
-
-            cur_lowest_levels.forEach(function(c){
-              container
-                  .append($('<option>')
-                  .attr('data-ipcc_code', c.IPCC_CODE)
-                  .text(c.IPCC_CODE + " " +  c.FULLNAME)
-                  )
-            })
         })
-})
+    })
 
-  $('#sector-selector')
-  .select2({searchInputPlaceholder: 'Search sectors'}) /* https://stackoverflow.com/questions/45819164/how-make-select2-placeholder-for-search-input */
-  .on('select2:select', function(){UpdateS()})
+    $('#sector-selector')
+    .select2({searchInputPlaceholder: 'Search sectors'}) /* https://stackoverflow.com/questions/45819164/how-make-select2-placeholder-for-search-input */
+    .on('select2:select', function(){UpdateS()})
 
 /* Year */
   
-  $('#year-selector').select2({ 
-    data: Array.from({length: 31}, (x, i) => 1990 + i),
-    minimumResultsForSearch: Infinity // hides searchbar
+$('#year-selector').select2({ 
+  data: Array.from({length: 31}, (x, i) => 1990 + i),
+  minimumResultsForSearch: Infinity // hides searchbar
+})
+.val(2020).trigger('change')
+.on('select2:select', function(){
+  cur_year = $('#year-selector').val()
+  d3.csv('./data/'+ cur_year +'.csv').then(function(data){
+    cur_data = data
+    UpdatePY()
   })
-  .val(2020).trigger('change')
-  .on('select2:select', function(){
-    cur_year = $('#year-selector').val()
-    d3.csv('./data/'+ cur_year +'.csv').then(function(data){
-      cur_data = data
-      UpdatePY()
-    })
-  })
+})
+
+})
 
 /* Jurisdictions */
   
@@ -193,67 +194,89 @@ $('#clear_all').click(function(){
 
 });
 
-
 /*  */
 /* Initialize Chart and Selectors */
 /*  */
 
-cur_year = $('#year-selector').val()
+//cur_year = $('#year-selector').val()
+cur_year = 2020 // Sync issue when passing through iframe (required for integration). For now, move to hardcoded defaults
 
- d3.csv('./data/'+ cur_year +'.csv').then(function(data){
-   cur_data = data
-   let sector = $('#sector-selector').val()
-    sector = sector === null ? undefined : sector.split(' ')[0]
-    let p2dat = $('#pricing-selector').select2('data')
-    let pricing = p2dat[0].prog_value
-
-    let sel_data = cur_data.filter(
-        d => (d.ipcc_code === sector
-                & d[pricing] !== "NA"
-            )
-    )
-
-    let loc_juri = sel_data.map(d => d.jurisdiction)
-    cur_pos_juri = [...new Set(loc_juri)]
-
-    UpdateJuriSelect(cur_pos_juri)
+function waitForElement(){
+  if(subnats.length > 0){
+    d3.csv('./data/'+ cur_year +'.csv').then(function(data){
+      cur_data = data
     
-    cur_juri = cur_pos_juri
-
-    let loc_sector =  cur_data
-                        .filter(d => d[pricing] !== "NA")
-                        .map(d => d.ipcc_code)
-    cur_pos_sector = [... new Set(loc_sector)]
-
-    UpdateSectorSelect(cur_pos_sector)
-
-    /* Initilaize chart */
-
-    let sel_data_plus_missing = cur_data.filter(
-        d => (d.ipcc_code === sector
-                & cur_pos_juri.includes(d.jurisdiction)
+      let sector = '1A1A1 Electricity Generation' // Three next lines (and similar below) adress integration "sync" issues on RFF website
+      /* let upinit = $('#sector-selector').val()  */   // whereby, at this stage, $('#sector-selector').val() would sometimes return "undefined"
+      /* if(typeof upinit !== "undefined"){let sector = upinit} */ // because of async insues that did not show up in development stage
+      // For now, move to hardcoded defaults
+    
+      sector = sector === null ? undefined : sector.split(' ')[0]
+    
+      /* let p2dat = $('#pricing-selector').select2('data') */ // See 206
+      let pricing = 'tax_rate_incl_ex_kusd'
+      /* p2dat[0].prog_value */
+    
+      let sel_data = cur_data.filter(
+          d => (d.ipcc_code === sector
+                  & d[pricing] !== "NA"
               )
       )
     
-    let flat_count = countries.map(d=> d.jurisdiction)
-    let flat_can = subnat_can.map(d=> d.jurisdiction)
-    let flat_chn = subnat_chn.map(d=> d.jurisdiction)
-    let flat_usa = subnat_usa.map(d=> d.jurisdiction)
+        let loc_juri = sel_data.map(d => d.jurisdiction)
+        cur_pos_juri = [...new Set(loc_juri)]
+    
+        UpdateJuriSelect(cur_pos_juri)
+        
+        cur_juri = cur_pos_juri
+    
+        let loc_sector =  cur_data
+                            .filter(d => d[pricing] !== "NA")
+                            .map(d => d.ipcc_code)
+        cur_pos_sector = [... new Set(loc_sector)]
+    
+        UpdateSectorSelect(cur_pos_sector)
+    
+        /* Initilaize chart */
+    
+        let sel_data_plus_missing = cur_data.filter(
+            d => (d.ipcc_code === sector
+                    & cur_pos_juri.includes(d.jurisdiction)
+                  )
+          )
+    
+        let flat_count = countries.map(d=> d.jurisdiction)
+        let flat_can = subnat_can.map(d=> d.jurisdiction)
+        let flat_chn = subnat_chn.map(d=> d.jurisdiction)
+        let flat_usa = subnat_usa.map(d=> d.jurisdiction)
+    
+        ordered_juri = cur_pos_juri.filter(d => flat_count.includes(d))
+        ordered_juri = ordered_juri.concat(cur_pos_juri.filter(d => flat_can.includes(d)))
+        ordered_juri = ordered_juri.concat(cur_pos_juri.filter(d => flat_chn.includes(d)))
+        ordered_juri = ordered_juri.concat(cur_pos_juri.filter(d => flat_usa.includes(d)))
+    
+        let dis_data = products.map(d => (
+          {
+          'name': d,
+          'data': sel_data_plus_missing
+                .filter(c => c.Product === d)
+                .sort((a,b) => ordered_juri.indexOf(a['jurisdiction']) - ordered_juri.indexOf(b['jurisdiction']))
+                .map(e => (e[pricing] === 'NA' ? null : Math.round(e[pricing]*100)/100))
+          }
+          ))
+    
+        MultiChart(dis_data, ordered_juri, pricing, 
+                  /* $('#sector-selector').select2('data')[0].text */ // Sync issue when passing through iframe (required for integration). For now, move to hardcoded defaults
+                  '1A1A1 Electricity Generation'
+                  )
+    })
+  }
+  else{
+      setTimeout(waitForElement, 250);
+  }
+}
 
-    ordered_juri = cur_pos_juri.filter(d => flat_count.includes(d))
-    ordered_juri = ordered_juri.concat(cur_pos_juri.filter(d => flat_can.includes(d)))
-    ordered_juri = ordered_juri.concat(cur_pos_juri.filter(d => flat_chn.includes(d)))
-    ordered_juri = ordered_juri.concat(cur_pos_juri.filter(d => flat_usa.includes(d)))
+waitForElement()
 
-    let dis_data = products.map(d => (
-      {
-      'name': d,
-      'data': sel_data_plus_missing
-            .filter(c => c.Product === d)
-            .sort((a,b) => ordered_juri.indexOf(a['jurisdiction']) - ordered_juri.indexOf(b['jurisdiction']))
-            .map(e => (e[pricing] === 'NA' ? null : Math.round(e[pricing]*100)/100))
-      }
-      ))
 
-    MultiChart(dis_data, ordered_juri, pricing, $('#sector-selector').select2('data')[0].text)
- })
+ 
